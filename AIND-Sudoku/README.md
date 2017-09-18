@@ -3,11 +3,15 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: Constraints in a system tell us what is and what isn't allowed.
+From those constraints we can derive what states are possible for any given unit of the system.
+We use Naked Twins heuristic as added constraint, that we then propagate through out the system
+as we do with other constraints.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: We add diagonals as separate units to our program and include them in peers list.
+This will add diagonals under the same constraint system as rows/columns/squares
 
 ### Install
 
