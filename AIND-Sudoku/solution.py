@@ -61,6 +61,8 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+diagonal_left_units = [[i[0] + i[1] for i in zip(rows, cols)]]
+diagonal_right_units = [[i[0] + i[1] for i in zip(reversed(rows), cols)]]
 unitlist = row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
@@ -191,8 +193,6 @@ def solve(grid):
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
     global unitlist, peers, units
-    diagonal_left_units = [[i[0] + i[1] for i in zip(rows, cols)]]
-    diagonal_right_units = [[i[0] + i[1] for i in zip(reversed(rows), cols)]]
     unitlist += diagonal_left_units + diagonal_right_units
     units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
     peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
