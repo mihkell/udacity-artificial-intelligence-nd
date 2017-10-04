@@ -120,7 +120,7 @@ class IsolationPlayer:
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
         self.current_best_move = (-1, -1)
-        self.MAX_INT = 100000
+        self.MAX_INT = 1000
 
 
 class MinimaxPlayer(IsolationPlayer):
@@ -217,16 +217,16 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        legal_moves = game.get_legal_moves(game.get_opponent(game.active_player))
+        legal_moves = game.get_legal_moves(game.active_player)
         if not legal_moves:
             return tuple((-1, -1))
+
         if depth == 1:
             return legal_moves[0]
 
-
         legal_moves = game.get_legal_moves(game.active_player)
 
-        self.current_best_move = (-1, -1)
+        current_best_move = self.current_best_move
         max_val = -self.MAX_INT
         for next_move in legal_moves:
             c_game = copy.deepcopy(game)
@@ -235,9 +235,9 @@ class MinimaxPlayer(IsolationPlayer):
             new_max = self.min(c_game, depth - 1)
             if new_max > max_val:
                 max_val = new_max
-                self.current_best_move = next_move
+                current_best_move = next_move
 
-        return self.current_best_move
+        return current_best_move
 
     def min(self, game: Board, depth: int) -> int:
         if self.time_left() < self.TIMER_THRESHOLD:
@@ -245,15 +245,16 @@ class MinimaxPlayer(IsolationPlayer):
 
         legal_moves = game.get_legal_moves(game.active_player)
         if not legal_moves:
-            return depth
+            return 1
 
-        legal_moves = game.get_legal_moves(game.active_player)
+        if not depth:
+            return len(game.get_legal_moves(game.inactive_player))
 
         move = self.MAX_INT
         for next_move in legal_moves:
             c_game = copy.deepcopy(game)
             c_game.apply_move(next_move)
-            min(move, self.max(c_game, depth - 1))
+            move = min(move, self.max(c_game, depth - 1))
 
         return move
 
@@ -263,14 +264,15 @@ class MinimaxPlayer(IsolationPlayer):
 
         legal_moves = game.get_legal_moves(game.active_player)
         if not legal_moves:
-            return -depth
+            return -1
+        if not depth:
+            return len(game.get_legal_moves(game.inactive_player))
 
-        legal_moves = game.get_legal_moves(game.active_player)
         move = -self.MAX_INT
         for next_move in legal_moves:
             c_game = copy.deepcopy(game)
             c_game.apply_move(next_move)
-            min(move, self.max(c_game, depth - 1))
+            move = max(move, self.min(c_game, depth - 1))
 
         return move
 

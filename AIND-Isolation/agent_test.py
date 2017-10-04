@@ -22,7 +22,7 @@ class IsolationTest(unittest.TestCase):
 
     def test_game_play(self):
         game = isolation.Board(self.player1, self.player2, width=3, height=3)
-        depth = 10000
+        depth = 2
         player = game_agent.MinimaxPlayer(search_depth=depth)
         time_left = lambda: 10000
         print(game.to_string(), -1)
@@ -30,8 +30,11 @@ class IsolationTest(unittest.TestCase):
         for i in range(13):
             move = player.get_move(game, time_left)
             if move == (-1, -1):
-                print("active player: {}".format(game.active_player))
+                print("{} wins".format(game.inactive_player))
                 break
+            else:
+                print("Move: {}".format(move))
+
             game.apply_move(move)
             print(game.to_string(), i)
 
