@@ -36,7 +36,7 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    return len(game.get_legal_moves(game.inactive_player))
 
 
 def custom_score_2(game, player):
@@ -226,7 +226,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         legal_moves = game.get_legal_moves(game.active_player)
 
-        current_best_move = self.current_best_move
+        self.current_best_move = (-1, -1)
         max_val = -self.MAX_INT
         for next_move in legal_moves:
             c_game = copy.deepcopy(game)
@@ -235,11 +235,11 @@ class MinimaxPlayer(IsolationPlayer):
             new_max = self.min(c_game, depth - 1)
             if new_max > max_val:
                 max_val = new_max
-                current_best_move = next_move
+                self.current_best_move = next_move
 
-        return current_best_move
+        return self.current_best_move
 
-    def min(self, game: Board, depth: int) -> int:
+    def min(self, game: Board, depth: int) -> float:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
@@ -248,7 +248,7 @@ class MinimaxPlayer(IsolationPlayer):
             return 1
 
         if not depth:
-            return len(game.get_legal_moves(game.inactive_player))
+            return custom_score(game, game.inactive_player)
 
         move = self.MAX_INT
         for next_move in legal_moves:
@@ -258,15 +258,16 @@ class MinimaxPlayer(IsolationPlayer):
 
         return move
 
-    def max(self, game: Board, depth: int) -> int:
+    def max(self, game: Board, depth: int) -> float:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         legal_moves = game.get_legal_moves(game.active_player)
         if not legal_moves:
             return -1
+
         if not depth:
-            return len(game.get_legal_moves(game.inactive_player))
+            return custom_score(game, game.inactive_player)
 
         move = -self.MAX_INT
         for next_move in legal_moves:
@@ -316,7 +317,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         # TODO: finish this function!
-        raise NotImplementedError
+        return self.alphabeta(game, self.search_depth)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -367,4 +368,5 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        legal_moves = game.get_legal_moves(game.active_player)
+        return legal_moves[0] if legal_moves else (-1, -1)
