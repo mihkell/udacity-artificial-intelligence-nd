@@ -36,7 +36,12 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    return len(game.get_legal_moves(game.inactive_player))
+    if game.is_winner(player):
+        return float('inf')
+    if game.is_loser(player):
+        return float('-inf')
+
+    return len(game.get_legal_moves(player))
 
 
 def custom_score_2(game, player):
@@ -62,7 +67,12 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_winner(player):
+        return float('inf')
+    if game.is_loser(player):
+        return float('-inf')
+
+    return len(game.get_legal_moves(player)) - len(game.get_legal_moves(game.get_opponent(player)))
 
 
 def custom_score_3(game, player):
@@ -88,7 +98,7 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    return 1 if game.is_winner(player) else 0
 
 
 class IsolationPlayer:
@@ -229,10 +239,8 @@ class MinimaxPlayer(IsolationPlayer):
         self.current_best_move = (-1, -1)
         max_val = -self.MAX_INT
         for next_move in legal_moves:
-            c_game = copy.deepcopy(game)
-            c_game.apply_move(next_move)
-
-            new_max = self.min(c_game, depth - 1)
+            new_max = self.min(game.forecast_move(next_move),
+                               depth - 1)
             if new_max > max_val:
                 max_val = new_max
                 self.current_best_move = next_move
@@ -243,18 +251,17 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        legal_moves = game.get_legal_moves(game.active_player)
-        if not legal_moves:
+        if game.is_loser(game.active_player):
             return 1
 
         if not depth:
-            return custom_score(game, game.inactive_player)
+            return self.score(game, game.inactive_player)
 
-        move = self.MAX_INT
+        legal_moves = game.get_legal_moves(game.active_player)
+        move = float('inf')
         for next_move in legal_moves:
-            c_game = copy.deepcopy(game)
-            c_game.apply_move(next_move)
-            move = min(move, self.max(c_game, depth - 1))
+            move = min(move, self.max(game.forecast_move(next_move),
+                                      depth - 1))
 
         return move
 
@@ -262,18 +269,17 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        legal_moves = game.get_legal_moves(game.active_player)
-        if not legal_moves:
+        if game.is_loser(game.active_player):
             return -1
 
         if not depth:
-            return custom_score(game, game.inactive_player)
+            return self.score(game, game.inactive_player)
 
-        move = -self.MAX_INT
+        legal_moves = game.get_legal_moves(game.active_player)
+        move = float('-inf')
         for next_move in legal_moves:
-            c_game = copy.deepcopy(game)
-            c_game.apply_move(next_move)
-            move = max(move, self.min(c_game, depth - 1))
+            move = max(move, self.min(game.forecast_move(next_move)
+                                      , depth - 1))
 
         return move
 
