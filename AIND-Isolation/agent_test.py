@@ -22,8 +22,8 @@ class IsolationTest(unittest.TestCase):
 
     def test_game_play(self):
         game = isolation.Board(self.player1, self.player2, width=3, height=3)
-        depth = 2
-        player = game_agent.MinimaxPlayer(search_depth=depth)
+        depth = 1000
+        player = game_agent.AlphaBetaPlayer(search_depth=depth)
         time_left = lambda: 10000
         print(game.to_string(), -1)
 
