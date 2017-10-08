@@ -15,8 +15,7 @@ class SearchTimeout(Exception):
     pass
 
 
-
-def custom_score(game, player):
+def custom_score(game, player) -> float:
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -48,10 +47,10 @@ def custom_score(game, player):
     player_moves = len(game.get_legal_moves(player))
     opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    return player_moves - opponent_moves * 2
+    return float(player_moves - opponent_moves * 2)
 
 
-def custom_score_2(game, player):
+def custom_score_2(game, player) -> float:
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -79,11 +78,10 @@ def custom_score_2(game, player):
     if game.is_loser(player):
         return NEG_INFINITY
 
-    return len(game.get_legal_moves(player)) + len(game.get_blank_spaces())
+    return float(len(game.get_legal_moves(player)) + len(game.get_blank_spaces()))
 
 
-
-def custom_score_3(game, player):
+def custom_score_3(game, player) -> float:
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -111,8 +109,7 @@ def custom_score_3(game, player):
     if game.is_loser(player):
         return NEG_INFINITY
 
-    return len(game.get_legal_moves(player))
-
+    return float(len(game.get_legal_moves(player)))
 
 
 class IsolationPlayer:
@@ -248,20 +245,38 @@ class MinimaxPlayer(IsolationPlayer):
         self.current_best_move = NEGATIVE_MOVE
         max_val = NEG_INFINITY
         for next_move in legal_moves:
-            new_max = self.min(game.forecast_move(next_move),
-                               depth - 1)
+            new_max = self.minValue(game.forecast_move(next_move),
+                                    depth - 1)
             if new_max > max_val:
                 max_val = new_max
                 self.current_best_move = next_move
 
         return self.current_best_move
 
-    def min(self, game: Board, depth: int) -> float:
+    def maxValue(self, game: Board, depth: int) -> float:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         if game.is_loser(game.active_player):
-            return 1
+            return NEG_INFINITY
+
+        if not depth:
+            return self.score(game, game.active_player)
+
+        legal_moves = game.get_legal_moves(game.active_player)
+        move = NEG_INFINITY
+        for next_move in legal_moves:
+            move = max(move,
+                       self.minValue(game.forecast_move(next_move), depth - 1))
+
+        return move
+
+    def minValue(self, game: Board, depth: int) -> float:
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if game.is_loser(game.active_player):
+            return INFINITY
 
         if not depth:
             return self.score(game, game.active_player)
@@ -269,26 +284,8 @@ class MinimaxPlayer(IsolationPlayer):
         legal_moves = game.get_legal_moves(game.active_player)
         move = float('inf')
         for next_move in legal_moves:
-            move = min(move, self.max(game.forecast_move(next_move),
-                                      depth - 1))
-
-        return move
-
-    def max(self, game: Board, depth: int) -> float:
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-
-        if game.is_loser(game.active_player):
-            return -1
-
-        if not depth:
-            return self.score(game, game.active_player)
-
-        legal_moves = game.get_legal_moves(game.active_player)
-        move = float('-inf')
-        for next_move in legal_moves:
-            move = max(move, self.min(game.forecast_move(next_move)
-                                      , depth - 1))
+            move = min(move,
+                       self.maxValue(game.forecast_move(next_move), depth - 1))
 
         return move
 
