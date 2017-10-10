@@ -332,19 +332,20 @@ class AlphaBetaPlayer(IsolationPlayer):
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.alphabeta(game, self.search_depth)
+            depth = 0
+            while True:
+                depth += 1
+                self.current_best_move = self.alphabeta(game, depth)
 
         except SearchTimeout:
-            print("TIME_OUT")
             if self.current_best_move == NEGATIVE_MOVE and \
                     game.get_legal_moves(game.active_player):
-                print("ERROR RETURN!")
                 return game.get_legal_moves(game.active_player)[0]
 
-        # TODO: finish this function!
         return self.current_best_move
 
-    def alphabeta(self, game: Board, depth, alpha=float("-inf"), beta=float("inf")):
+    def alphabeta(self,
+                  game: Board, depth, alpha=float("-inf"), beta=float("inf")) -> tuple:
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
