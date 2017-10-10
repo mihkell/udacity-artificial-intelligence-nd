@@ -279,7 +279,7 @@ class MinimaxPlayer(IsolationPlayer):
             return INFINITY
 
         if depth <= 0:
-            return self.score(game, game._inactive_player)
+            return self.score(game, game.inactive_player)
 
         legal_moves = game.get_legal_moves(game.active_player)
         move = INFINITY
@@ -335,8 +335,10 @@ class AlphaBetaPlayer(IsolationPlayer):
             return self.alphabeta(game, self.search_depth)
 
         except SearchTimeout:
+            print("TIME_OUT")
             if self.current_best_move == NEGATIVE_MOVE and \
                     game.get_legal_moves(game.active_player):
+                print("ERROR RETURN!")
                 return game.get_legal_moves(game.active_player)[0]
 
         # TODO: finish this function!
@@ -392,55 +394,61 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # TODO: finish this function!
 
-        if game.is_loser(game.active_player):
-            return NEGATIVE_MOVE
-
-        legal_moves = game.get_legal_moves(game.active_player)
-
-        max_val = NEG_INFINITY
-        for next_move in legal_moves:
-            new_max = self.minValue(game.forecast_move(next_move),
-                                    depth, alpha, beta)
-            if new_max >= max_val:
-                max_val = new_max
-                self.current_best_move = next_move
-
-        return self.current_best_move
+        move = NEG_INFINITY
+        alpha_move = (alpha, NEGATIVE_MOVE)
+        for next_move in game.get_legal_moves(game.active_player):
+            move = max(move,
+                       self.min_value(game.forecast_move(next_move),
+                                      depth - 1,
+                                      alpha_move[0],
+                                      beta))
+            if move == alpha_move[0]:
+                continue
+            alpha_move = max(alpha_move, (move, next_move))
+        return alpha_move[1]
 
     def max_value(self, game: Board, depth: int, alpha: float, beta: float) -> float:
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-
-        if game.is_winner(game.active_player):
-            return INFINITY
-
-        if depth <= 0:
-            return self.score(game, game.active_player)
-
-        v = NEG_INFINITY
-        legal_moves = game.get_legal_moves(game.active_player)
-        for move in legal_moves:
-            v = max(v, self.min_value(game.forecast_move(move), depth - 1, alpha, beta))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
-        return v
-
-    def min_value(self, game: Board, depth, alpha, beta):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         if game.is_loser(game.active_player):
             return NEG_INFINITY
 
-        if depth <= 0:
+        if depth <= 0 :
             return self.score(game, game.active_player)
 
-        v = INFINITY
         legal_moves = game.get_legal_moves(game.active_player)
-        for move in legal_moves:
-            v = min(v, self.max_value(game.forecast_move(move), depth - 1, alpha, beta))
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
-        return v
+        move = NEG_INFINITY
+        for next_move in legal_moves:
+            move = max(move,
+                       self.min_value(game.forecast_move(next_move),
+                                      depth - 1,
+                                      alpha,
+                                      beta))
+            if move >= beta:
+                return move
+            alpha = max(alpha, move)
+        return alpha
+
+    def min_value(self, game: Board, depth: int, alpha: float, beta: float) -> float:
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if game.is_loser(game.active_player):
+            return INFINITY
+
+        if depth <= 0:
+            return self.score(game, game.inactive_player)
+
+        legal_moves = game.get_legal_moves(game.active_player)
+        move = INFINITY
+        for next_move in legal_moves:
+            move = min(move,
+                       self.max_value(game.forecast_move(next_move),
+                                      depth - 1,
+                                      alpha,
+                                      beta))
+            if move <= alpha:
+                return move
+            beta = min(beta, move)
+        return beta
