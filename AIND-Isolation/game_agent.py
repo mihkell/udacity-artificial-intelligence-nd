@@ -411,10 +411,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if game.is_loser(game.active_player):
-            return NEG_INFINITY
-
-        if depth <= 0 :
+        if depth <= 0 or game.is_loser(game.active_player):
             return self.score(game, game.active_player)
 
         legal_moves = game.get_legal_moves(game.active_player)
@@ -434,10 +431,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if game.is_loser(game.active_player):
-            return INFINITY
-
-        if depth <= 0:
+        if depth <= 0 or game.is_loser(game.active_player):
             return self.score(game, game.inactive_player)
 
         legal_moves = game.get_legal_moves(game.active_player)
