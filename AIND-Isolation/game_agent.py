@@ -336,6 +336,8 @@ class AlphaBetaPlayer(IsolationPlayer):
             while True:
                 depth += 1
                 self.current_best_move = self.alphabeta(game, depth)
+                if game.utility(game.active_player):
+                    break
 
         except SearchTimeout:
             if self.current_best_move == NEGATIVE_MOVE and \
@@ -343,6 +345,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 return game.get_legal_moves(game.active_player)[0]
 
         return self.current_best_move
+
 
     def alphabeta(self,
                   game: Board, depth, alpha=float("-inf"), beta=float("inf")) -> tuple:
