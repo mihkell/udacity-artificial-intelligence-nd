@@ -44,7 +44,10 @@ def custom_score(game, player) -> float:
     if game.is_loser(player):
         return NEG_INFINITY
 
-    return float(len(game.get_legal_moves(player)))
+    player_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(player_moves - opponent_moves * 8)
 
 
 def custom_score_2(game, player) -> float:
@@ -75,7 +78,10 @@ def custom_score_2(game, player) -> float:
     if game.is_loser(player):
         return NEG_INFINITY
 
-    return float(len(game.get_legal_moves(player)) + len(game.get_blank_spaces()))
+    player_moves_count = len(game.get_legal_moves(player))
+    number_of_blank_spaces = len(game.get_blank_spaces())
+
+    return float(player_moves_count + number_of_blank_spaces)
 
 
 def custom_score_3(game, player) -> float:
@@ -106,10 +112,11 @@ def custom_score_3(game, player) -> float:
     if game.is_loser(player):
         return NEG_INFINITY
 
-    player_moves = len(game.get_legal_moves(player))
-    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    scaled_opponent_moves_count = \
+            len(game.get_legal_moves(game.get_opponent(player))) * 20
+    number_of_blank_spaces = len(game.get_blank_spaces())
 
-    return float(player_moves - opponent_moves * 2)
+    return float(number_of_blank_spaces - scaled_opponent_moves_count)
 
 
 class IsolationPlayer:
@@ -345,7 +352,6 @@ class AlphaBetaPlayer(IsolationPlayer):
                 return game.get_legal_moves(game.active_player)[0]
 
         return self.current_best_move
-
 
     def alphabeta(self,
                   game: Board, depth, alpha=float("-inf"), beta=float("inf")) -> tuple:
