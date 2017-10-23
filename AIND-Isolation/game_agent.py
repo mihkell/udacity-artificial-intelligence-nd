@@ -2,7 +2,6 @@
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
-import random, copy
 from isolation.isolation import Board
 
 NEGATIVE_MOVE = (-1, -1)
@@ -13,6 +12,18 @@ NEG_INFINITY = float('-inf')
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
+
+
+square_moves = [
+    (-1, -1), (-1, 0), (-1, 1),
+    (0, -1), (0, 1),
+    (1, -1), (0, 1), (1, 1)
+]
+
+second_moves_outside = [(-2, 0), (2, 0), (0, -2), (0, 2)]
+
+second_moves = [square_moves[0], square_moves[2],
+                square_moves[5], square_moves[7]]
 
 
 def custom_score(game, player) -> float:
@@ -73,50 +84,59 @@ def custom_score_2(game, player) -> float:
         The heuristic value of the current game state to the specified player.
     """
 
+    def future_open_move_locations(game, player):
+        future_step_locations = []
+        blank_spaces = game.get_blank_spaces()
+        player_location = game.get_player_location(player)
+        s_moves = []
+        s_moves.extend(second_moves_outside)
+        s_moves.extend(square_moves)
+        for move in s_moves:
+            location = tuple(map(sum, zip(player_location, move)))
+            if location in blank_spaces:
+                future_step_locations.append(location)
+        return future_step_locations
+
+    def future_open_move_locations_amount(game, player):
+        return len(future_open_move_locations(game, player))
+
     if game.is_winner(player):
         return INFINITY
     if game.is_loser(player):
         return NEG_INFINITY
 
     player_moves_count = len(game.get_legal_moves(player))
-    number_of_blank_spaces = len(game.get_blank_spaces())
 
-    return float(player_moves_count + number_of_blank_spaces)
+    return float(player_moves_count + future_open_move_locations_amount(game, player))
 
 
-def custom_score_3(game, player) -> float:
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
+def custom_score_3(game: Board, player) -> float:
+    def future_open_move_locations(game, player):
+        future_step_locations = []
+        blank_spaces = game.get_blank_spaces()
+        player_location = game.get_player_location(player)
+        s_moves = []
+        s_moves.extend(second_moves_outside)
+        s_moves.extend(square_moves)
+        for move in s_moves:
+            location = tuple(map(sum, zip(player_location, move)))
+            if location in blank_spaces:
+                future_step_locations.append(location)
+        return future_step_locations
 
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
-    """
-    # TODO: finish this function!
+    def future_open_move_locations_amount(game, player):
+        return len(future_open_move_locations(game, player))
     if game.is_winner(player):
         return INFINITY
     if game.is_loser(player):
         return NEG_INFINITY
 
-    scaled_opponent_moves_count = \
-            len(game.get_legal_moves(game.get_opponent(player))) * 20
-    number_of_blank_spaces = len(game.get_blank_spaces())
+    future_step_locations_amount = future_open_move_locations_amount(game, player)
 
-    return float(number_of_blank_spaces - scaled_opponent_moves_count)
+    player_moves_count = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(player_moves_count / 2 + future_step_locations_amount / 3 - opponent_moves / 2)
 
 
 class IsolationPlayer:
